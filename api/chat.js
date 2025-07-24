@@ -67,49 +67,20 @@ export default async function handler(req, res) {
             });
         }
 
-        // Mobile-optimized system prompt
-        const mobileSystemPrompt = `You are a wise Krishna consciousness guide. Keep responses concise (1-3 sentences for mobile). Focus on Krishna, Bhagavad Gita, and spiritual wisdom only. Use 🙏 occasionally. Be warm and practical.
+        // OPTIMIZED: Universal concise system prompt for ALL devices
+        const universalSystemPrompt = `You are a wise Krishna consciousness guide. Keep responses concise (1-3 sentences). Focus on Krishna, Bhagavad Gita, and spiritual wisdom only. Use 🙏 occasionally. Be warm and practical.
 
 ONLY discuss: Krishna teachings, Bhagavad Gita, meditation, spiritual growth, dharma, karma, inner peace.
 NEVER discuss: politics, technology, entertainment, non-spiritual topics.
 
 If asked about non-spiritual topics, redirect: "I'm here for spiritual guidance about Krishna and divine wisdom. How can I help your spiritual journey?"`;
 
-        const desktopSystemPrompt = `You are a wise spiritual guide specializing in Krishna consciousness, Bhagavad Gita teachings, and Hindu spirituality. Your role is to:
+        // OPTIMIZED: Use same concise prompt for all devices
+        const systemPrompt = universalSystemPrompt;
 
-1. ONLY discuss topics related to:
-   - Lord Krishna and his teachings
-   - Bhagavad Gita verses and their meanings
-   - Hindu philosophy and spirituality
-   - Meditation and spiritual practices
-   - Dharma, karma, and spiritual concepts
-   - Inner peace and spiritual growth
-
-2. NEVER discuss:
-   - Politics, current events, technology
-   - Personal relationships (unless spiritual context)
-   - Non-spiritual topics, entertainment, sports
-   - Other religions in detail (brief respectful mentions only)
-   - Material or worldly advice unrelated to spirituality
-
-3. Communication style:
-   - Warm, compassionate, and wise
-   - Use simple, accessible language
-   - Include relevant Sanskrit terms with explanations
-   - Share practical spiritual guidance
-   - Keep responses meaningful but concise
-   - Begin with 🙏 or ✨ occasionally for warmth
-
-4. If asked about non-spiritual topics, gently redirect: "I'm here to guide you on spiritual matters related to Krishna, the Bhagavad Gita, and divine wisdom. How can I help you on your spiritual journey?"
-
-Remember: You are a spiritual counselor focused on helping souls find peace, wisdom, and connection with the divine.`;
-
-        // Choose system prompt based on device type
-        const systemPrompt = isMobileRequest ? mobileSystemPrompt : desktopSystemPrompt;
-
-        // Mobile-optimized token limits
-        const maxTokens = isMobileRequest ? (isSlowConnection ? 150 : 200) : 300;
-        const temperature = isMobileRequest ? 0.6 : 0.7; // Slightly more focused for mobile
+        // OPTIMIZED: Same token limits for all devices (desktop now gets same as mobile)
+        const maxTokens = isSlowConnection ? 150 : 200; // No more 300 tokens for desktop
+        const temperature = isMobileRequest ? 0.6 : 0.7; // Keep slight temperature difference
 
         // Prepare messages for API with mobile optimization
         const messages = [
@@ -133,7 +104,7 @@ Remember: You are a spiritual counselor focused on helping souls find peace, wis
                     'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json',
                     'HTTP-Referer': process.env.VERCEL_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://meditation-app.vercel.app',
-                    'X-Title': '60 Second Meditation - Mobile Optimized'
+                    'X-Title': '60 Second Meditation - Universally Optimized'
                 },
                 body: JSON.stringify({
                     model: 'mistralai/mistral-small-3.2-24b-instruct:free',
@@ -177,17 +148,15 @@ Remember: You are a spiritual counselor focused on helping souls find peace, wis
 
             let aiResponse = data.choices[0].message.content.trim();
 
-            // Mobile-specific response processing
-            if (isMobileRequest) {
-                // Ensure response isn't too long for mobile
-                if (aiResponse.length > 400) {
-                    const sentences = aiResponse.split(/[.!?]+/);
-                    aiResponse = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '.' : '');
-                }
-
-                // Add line breaks for better mobile readability
-                aiResponse = aiResponse.replace(/\. ([A-Z])/g, '.\n\n$1');
+            // OPTIMIZED: Apply same response processing to ALL devices (not just mobile)
+            // Ensure response isn't too long for ANY device
+            if (aiResponse.length > 400) {
+                const sentences = aiResponse.split(/[.!?]+/);
+                aiResponse = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '.' : '');
             }
+
+            // Add line breaks for better readability on ALL devices
+            aiResponse = aiResponse.replace(/\. ([A-Z])/g, '.\n\n$1');
 
             // Log successful response
             console.log(`Successful response - Mobile: ${isMobileRequest}, Length: ${aiResponse.length}`);
