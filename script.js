@@ -131,25 +131,36 @@ function setupMobileOptimizations() {
     console.log('Mobile optimizations applied');
 }
 
-// Setup touch optimizations
+// Setup touch optimizations - STABILIZED VERSION
 function setupTouchOptimizations() {
-    // Enhanced touch feedback for buttons
+    // Enhanced touch feedback for buttons - FIXED TO PREVENT SWINGING
     const touchButtons = [elements.releaseBtn, elements.muteBtn, elements.chatBtn, elements.newTeachingBtn, elements.restartBtn];
     
     touchButtons.forEach(button => {
         if (!button) return;
         
         button.addEventListener('touchstart', function(e) {
-            this.style.transform = 'scale(0.95)';
-            this.style.transition = 'transform 0.1s ease';
+            // STABILITY FIX: Only apply scale if button is properly positioned
+            if (this.getBoundingClientRect().width > 0) {
+                this.style.transform = 'scale(0.95)';
+                this.style.transition = 'transform 0.1s ease';
+                this.style.transformOrigin = 'center center';
+            }
         }, { passive: true });
         
         button.addEventListener('touchend', function(e) {
+            // STABILITY FIX: Reset transform smoothly
             this.style.transform = 'scale(1)';
+            setTimeout(() => {
+                this.style.transform = '';
+                this.style.transformOrigin = '';
+            }, 100);
         }, { passive: true });
         
         button.addEventListener('touchcancel', function(e) {
-            this.style.transform = 'scale(1)';
+            // STABILITY FIX: Reset transform immediately
+            this.style.transform = '';
+            this.style.transformOrigin = '';
         }, { passive: true });
     });
     
@@ -379,26 +390,24 @@ function showStep(stepNumber) {
     }
 }
 
-// Start meditation process
+// Start meditation process - STABILIZED VERSION
 function startMeditation() {
     const worryText = elements.worryInput.value.trim();
     
     if (!worryText) {
-        // Mobile-optimized feedback for empty input
+        // STABILITY FIX: Removed horizontal shake animation that caused swinging!
+        // Mobile-optimized feedback for empty input - NO HORIZONTAL MOVEMENT
         if (isMobile) {
-            // Simple shake effect for mobile
-            elements.glowingCircle.style.transform = 'translateX(-10px)';
+            // Simple pulse effect instead of shake for mobile
+            elements.glowingCircle.style.opacity = '0.5';
             setTimeout(() => {
-                elements.glowingCircle.style.transform = 'translateX(10px)';
-            }, 100);
-            setTimeout(() => {
-                elements.glowingCircle.style.transform = 'translateX(0)';
-            }, 200);
+                elements.glowingCircle.style.opacity = '1';
+            }, 150);
         } else {
-            // Full animation for desktop
+            // Desktop: Use CSS animation instead of transform manipulation
             elements.glowingCircle.style.animation = 'none';
             elements.glowingCircle.offsetHeight; // Trigger reflow
-            elements.glowingCircle.style.animation = 'enhancedPulseGlow 0.3s ease 3';
+            elements.glowingCircle.style.animation = 'enhancedPulseGlowStable 0.3s ease 3';
         }
         
         if (!isMobile) {
@@ -477,7 +486,7 @@ function startTransition() {
     }, transitionDelay);
 }
 
-// Create beautiful golden transition particles (desktop only)
+// Create beautiful golden transition particles - STABILIZED VERSION
 function createTransitionParticles() {
     const step3 = document.getElementById('step3');
     if (!step3) return; // Safety check
@@ -492,7 +501,7 @@ function createTransitionParticles() {
             border-radius: 50%;
             left: ${Math.random() * 100}%;
             top: ${Math.random() * 100}%;
-            animation: floatDivine ${4 + Math.random() * 2}s ease-in-out infinite;
+            animation: floatDivineStable ${4 + Math.random() * 2}s ease-in-out infinite;
             pointer-events: none;
             z-index: 1;
         `;
@@ -577,7 +586,7 @@ function triggerElectricAnimation() {
     }
 }
 
-// Enhanced toggle mute with mobile optimization
+// Enhanced toggle mute with mobile optimization - STABILIZED VERSION
 function toggleMute() {
     isMuted = !isMuted;
     
@@ -593,15 +602,22 @@ function toggleMute() {
         elements.muteBtn.innerHTML = '<span class="mute-icon">🔊</span>';
     }
     
-    // Enhanced visual feedback
+    // STABILITY FIX: Enhanced visual feedback without causing drift
     const scaleValue = isMobile ? '0.9' : '0.85';
-    elements.muteBtn.style.transform = `scale(${scaleValue})`;
-    setTimeout(() => {
-        elements.muteBtn.style.transform = 'scale(1)';
-    }, 150);
+    if (elements.muteBtn.getBoundingClientRect().width > 0) {
+        elements.muteBtn.style.transform = `scale(${scaleValue})`;
+        elements.muteBtn.style.transformOrigin = 'center center';
+        setTimeout(() => {
+            elements.muteBtn.style.transform = 'scale(1)';
+            setTimeout(() => {
+                elements.muteBtn.style.transform = '';
+                elements.muteBtn.style.transformOrigin = '';
+            }, 150);
+        }, 150);
+    }
 }
 
-// CRITICAL: Enhanced mobile-optimized chatbot functions
+// CRITICAL: Enhanced mobile-optimized chatbot functions - STABILIZED VERSION
 function openChatbot() {
     console.log('Opening chatbot - Mobile:', isMobile);
     
@@ -609,9 +625,9 @@ function openChatbot() {
     originalBodyStyle = document.body.style.cssText;
     isModalOpen = true;
     
-    // Mobile-specific modal handling
+    // STABILITY FIX: Mobile-specific modal handling without viewport jumping
     if (isMobile) {
-        // Prevent body scroll and movement
+        // Prevent body scroll and movement - STABILIZED
         document.body.classList.add('modal-open');
         document.body.style.overflow = 'hidden';
         document.body.style.position = 'fixed';
@@ -619,6 +635,8 @@ function openChatbot() {
         document.body.style.height = '100%';
         document.body.style.top = '0';
         document.body.style.left = '0';
+        // STABILITY FIX: Prevent any transform inheritance
+        document.body.style.transform = 'translateZ(0)';
         
         // Prevent viewport scaling
         const viewport = document.querySelector('meta[name="viewport"]');
@@ -648,17 +666,19 @@ function openChatbot() {
     }, 300);
 }
 
-// Enhanced close chatbot function
+// Enhanced close chatbot function - STABILIZED VERSION
 function closeChatbot() {
     console.log('Closing chatbot');
     
     elements.chatbotModal.classList.remove('active');
     isModalOpen = false;
     
-    // Restore body scroll and styles
+    // STABILITY FIX: Restore body scroll and styles without jumping
     if (isMobile) {
         document.body.classList.remove('modal-open');
         document.body.style.cssText = originalBodyStyle;
+        // STABILITY FIX: Remove any lingering transforms
+        document.body.style.transform = '';
         
         // Restore viewport scaling
         const viewport = document.querySelector('meta[name="viewport"]');
@@ -775,7 +795,7 @@ function debounce(func, wait) {
     };
 }
 
-// Add mobile-optimized dynamic styles
+// Add mobile-optimized dynamic styles - STABILIZED VERSION
 const style = document.createElement('style');
 style.textContent = `
     /* Mobile body lock styles */
@@ -784,9 +804,10 @@ style.textContent = `
         position: fixed !important;
         width: 100% !important;
         height: 100% !important;
+        transform: translateZ(0) !important;
     }
     
-    /* Desktop-only animations */
+    /* Desktop-only animations - STABILIZED VERSIONS */
     @media (min-width: 769px) {
         @keyframes electricPulse {
             0%, 100% {
@@ -806,9 +827,10 @@ style.textContent = `
             }
         }
         
-        @keyframes floatDivine {
+        /* STABILITY FIX: Removed rotation from floatDivine - this was causing swinging! */
+        @keyframes floatDivineStable {
             0% {
-                transform: translateY(20px) rotate(0deg);
+                transform: translateY(20px);
                 opacity: 0;
             }
             20% {
@@ -818,7 +840,7 @@ style.textContent = `
                 opacity: 1;
             }
             100% {
-                transform: translateY(-100px) rotate(360deg);
+                transform: translateY(-100px);
                 opacity: 0;
             }
         }
