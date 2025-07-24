@@ -2,26 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>60 Second Meditation - Find Peace Within</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Background particles container -->
+    <!-- Reduced particles for mobile performance -->
     <div class="particles-container">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
         <div class="particle"></div>
         <div class="particle"></div>
         <div class="particle"></div>
@@ -32,12 +20,12 @@
         <div class="particle"></div>
     </div>
 
-    <!-- Control buttons -->
+    <!-- Enhanced control buttons -->
     <div class="controls">
-        <button class="control-btn mute-btn" id="muteBtn">
+        <button class="control-btn mute-btn" id="muteBtn" aria-label="Toggle sound">
             <span class="mute-icon">🔊</span>
         </button>
-        <button class="control-btn chat-btn" id="chatBtn">
+        <button class="control-btn chat-btn" id="chatBtn" aria-label="Open chat">
             <span class="chat-icon">💬</span>
         </button>
     </div>
@@ -58,6 +46,10 @@
                         id="worryInput" 
                         placeholder="Type your worry here..."
                         maxlength="200"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="sentences"
+                        spellcheck="false"
                     ></textarea>
                 </div>
             </div>
@@ -120,12 +112,12 @@
         </div>
     </div>
 
-    <!-- Chatbot Modal -->
+    <!-- Mobile-Optimized Chatbot Modal -->
     <div class="chatbot-modal" id="chatbotModal">
         <div class="chatbot-container">
             <div class="chatbot-header">
                 <h3>Spiritual Guidance</h3>
-                <button class="close-chat" id="closeChatBtn">×</button>
+                <button class="close-chat" id="closeChatBtn" aria-label="Close chat">×</button>
             </div>
             <div class="chatbot-messages" id="chatbotMessages">
                 <div class="bot-message">
@@ -133,14 +125,21 @@
                 </div>
             </div>
             <div class="chatbot-input-container">
-                <input type="text" id="chatInput" placeholder="Ask about Krishna, Bhagavad Gita, spirituality...">
+                <input 
+                    type="text" 
+                    id="chatInput" 
+                    placeholder="Ask about Krishna, Bhagavad Gita..."
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="sentences"
+                >
                 <button id="sendChatBtn">Send</button>
             </div>
         </div>
     </div>
 
     <!-- Audio element -->
-    <audio id="backgroundMusic" loop>
+    <audio id="backgroundMusic" loop preload="metadata">
         <source src="bg.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
