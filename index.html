@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>60 Second Meditation - Find Peace Within</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background particles container -->
+    <div class="particles-container">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Control buttons -->
+    <div class="controls">
+        <button class="control-btn mute-btn" id="muteBtn">
+            <span class="mute-icon">🔊</span>
+        </button>
+        <button class="control-btn chat-btn" id="chatBtn">
+            <span class="chat-icon">💬</span>
+        </button>
+    </div>
+
+    <!-- Main app container -->
+    <div class="app-container">
+        
+        <!-- Step 1: Input worry -->
+        <div class="step step-1 active" id="step1">
+            <div class="welcome-text">
+                <h1 class="main-title">What's troubling your mind?</h1>
+                <p class="subtitle">Let it go into the universe...</p>
+            </div>
+            
+            <div class="input-container">
+                <div class="glowing-circle" id="glowingCircle">
+                    <textarea 
+                        id="worryInput" 
+                        placeholder="Type your worry here..."
+                        maxlength="200"
+                    ></textarea>
+                </div>
+            </div>
+            
+            <button class="release-btn" id="releaseBtn">Release Into the Universe</button>
+        </div>
+
+        <!-- Step 2: 60 second meditation -->
+        <div class="step step-2" id="step2">
+            <div class="meditation-container">
+                <div class="shrinking-circle" id="shrinkingCircle">
+                    <span class="worry-text" id="worryText"></span>
+                </div>
+                
+                <div class="meditation-message" id="meditationMessage">
+                    <h2>Breathe deeply and let go...</h2>
+                    <div class="timer" id="timer">60</div>
+                    <p class="calming-text" id="calmingText">Your worry is traveling to the stars...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Dark transition -->
+        <div class="step step-3" id="step3">
+            <div class="dark-screen">
+                <div class="transition-text">Your message has reached the divine...</div>
+            </div>
+        </div>
+
+        <!-- Step 4: Krishna teachings -->
+        <div class="step step-4" id="step4">
+            <div class="krishna-container">
+                <div class="krishna-image-container" id="krishnaImageContainer">
+                    <img src="krishna.png" alt="Lord Krishna" class="krishna-image" id="krishnaImage">
+                </div>
+                
+                <div class="teaching-container" id="teachingContainer">
+                    <div class="teaching-header">
+                        <h2>Divine Wisdom from Lord Krishna</h2>
+                    </div>
+                    
+                    <div class="sanskrit-verse" id="sanskritVerse">
+                        <!-- Sanskrit text will be populated by JavaScript -->
+                    </div>
+                    
+                    <div class="english-translation" id="englishTranslation">
+                        <!-- English translation will be populated by JavaScript -->
+                    </div>
+                    
+                    <div class="teaching-actions">
+                        <button class="action-btn new-teaching-btn" id="newTeachingBtn">
+                            New Wisdom
+                        </button>
+                        <button class="action-btn restart-btn" id="restartBtn">
+                            Start Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Modal -->
+    <div class="chatbot-modal" id="chatbotModal">
+        <div class="chatbot-container">
+            <div class="chatbot-header">
+                <h3>Spiritual Guidance</h3>
+                <button class="close-chat" id="closeChatBtn">×</button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="bot-message">
+                    <p>🙏 Namaste! I'm here to help with spiritual questions, Bhagavad Gita teachings, and Lord Krishna's wisdom. How may I guide you today?</p>
+                </div>
+            </div>
+            <div class="chatbot-input-container">
+                <input type="text" id="chatInput" placeholder="Ask about Krishna, Bhagavad Gita, spirituality...">
+                <button id="sendChatBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio element -->
+    <audio id="backgroundMusic" loop>
+        <source src="bg.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Loading divine wisdom...</p>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="chatbot.js"></script>
+</body>
+</html>
