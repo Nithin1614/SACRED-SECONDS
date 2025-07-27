@@ -1,4 +1,4 @@
-// /api/chat.js - Mobile-Optimized Vercel serverless function
+// /api/chat.js - Universally Optimized Vercel serverless function
 export default async function handler(req, res) {
     // Enhanced CORS headers with mobile considerations
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // Rate limiting for mobile (simpler check)
+        // Rate limiting check
         const messageWords = message.trim().split(/\s+/).length;
         if (messageWords < 2) {
             return res.status(400).json({ 
@@ -67,51 +67,72 @@ export default async function handler(req, res) {
             });
         }
 
-        // OPTIMIZED: Universal concise system prompt for ALL devices
-        const universalSystemPrompt = `You are a wise Krishna consciousness guide. Keep responses concise (1-3 sentences). Focus on Krishna, Bhagavad Gita, and spiritual wisdom only. Use 🙏 occasionally. Be warm and practical.
+        // ENHANCED: Expanded topics with respectful decline system
+        const enhancedSystemPrompt = `You are a wise spiritual guide. Keep responses concise (1-3 sentences). Avoid using 🙏 emoji in responses. Be warm but direct.
 
-ONLY discuss: Krishna teachings, Bhagavad Gita, meditation, spiritual growth, dharma, karma, inner peace.
-NEVER discuss: politics, technology, entertainment, non-spiritual topics.
+SPIRITUAL TOPICS YOU CAN DISCUSS:
+- Krishna teachings and Bhagavad Gita wisdom
+- Meditation, mindfulness, and spiritual practices
+- Self-help and personal development
+- Self-realization and consciousness
+- Inner peace, stress relief, and emotional well-being
+- Life purpose, meaning, and spiritual growth
+- Overcoming anxiety, fear, and negative emotions
+- Building confidence and self-worth
+- Forgiveness, letting go, and healing
+- Gratitude, compassion, and love
+- Dharma, karma, and spiritual principles
+- Devotion, surrender, and faith
+- Dealing with suffering and life challenges
 
-If asked about non-spiritual topics, redirect: "I'm here for spiritual guidance about Krishna and divine wisdom. How can I help your spiritual journey?"`;
+TOPICS TO POLITELY DECLINE:
+- Politics, current events, news
+- Technology, gadgets, technical support
+- Entertainment, movies, games, sports
+- Medical advice or health diagnoses
+- Financial, legal, or business advice
+- Relationship counseling (beyond spiritual perspective)
+- Academic subjects unrelated to spirituality
 
-        // OPTIMIZED: Use same concise prompt for all devices
-        const systemPrompt = universalSystemPrompt;
+If asked about declined topics, respond politely: "I focus specifically on spiritual guidance and self-development. I'd be happy to help you explore [topic] from a spiritual perspective instead. What spiritual question can I assist you with today?"
 
-        // OPTIMIZED: Same token limits for all devices (desktop now gets same as mobile)
-        const maxTokens = isSlowConnection ? 150 : 200; // No more 300 tokens for desktop
-        const temperature = isMobileRequest ? 0.6 : 0.7; // Keep slight temperature difference
+Keep responses practical, encouraging, and spiritually focused. No lengthy explanations.`;
 
-        // Prepare messages for API with mobile optimization
+        // Universal optimization: same approach for all devices
+        const systemPrompt = enhancedSystemPrompt;
+        const maxTokens = isSlowConnection ? 150 : 200; // Consistent concise responses
+        const temperature = 0.65; // Balanced for all devices
+
+        // Prepare messages for API
         const messages = [
             {
                 role: 'system',
                 content: systemPrompt
             },
-            ...(conversationHistory || []).slice(-10) // Limit history for mobile performance
+            ...(conversationHistory || []).slice(-8) // Slightly reduced for better performance
         ];
 
-        // Enhanced timeout handling for mobile
-        const timeoutMs = isMobileRequest ? 15000 : 30000;
+        // Enhanced timeout handling
+        const timeoutMs = isMobileRequest ? 15000 : 25000; // Slightly reduced desktop timeout
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
         try {
-            // Make request to OpenRouter API with mobile optimizations
+            // Make request to OpenRouter API
             const apiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json',
                     'HTTP-Referer': process.env.VERCEL_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://meditation-app.vercel.app',
-                    'X-Title': '60 Second Meditation - Universally Optimized'
+                    'X-Title': '60 Second Meditation - Enhanced Spiritual Guide'
                 },
                 body: JSON.stringify({
                     model: 'mistralai/mistral-small-3.2-24b-instruct:free',
                     messages: messages,
                     temperature: temperature,
                     max_tokens: maxTokens,
-                    top_p: isMobileRequest ? 0.8 : 0.9,
+                    top_p: 0.85, // Optimized for all devices
                     frequency_penalty: 0.1,
                     presence_penalty: 0.1
                 }),
@@ -124,10 +145,9 @@ If asked about non-spiritual topics, redirect: "I'm here for spiritual guidance 
                 const errorText = await apiResponse.text();
                 console.error('OpenRouter API error:', apiResponse.status, errorText);
                 
-                // Mobile-friendly error messages
                 const errorMessage = isMobileRequest ? 
                     'Connection issue. Please try again.' :
-                    'Failed to get spiritual guidance. Please try again in a moment.';
+                    'Unable to connect to spiritual guidance. Please try again.';
                     
                 return res.status(500).json({ 
                     error: errorMessage,
@@ -141,27 +161,38 @@ If asked about non-spiritual topics, redirect: "I'm here for spiritual guidance 
             if (!data.choices || !data.choices[0] || !data.choices[0].message) {
                 console.error('Unexpected API response format:', data);
                 return res.status(500).json({ 
-                    error: isMobileRequest ? 'Invalid response format' : 'Invalid AI response format',
+                    error: 'Invalid response format',
                     mobile: isMobileRequest
                 });
             }
 
             let aiResponse = data.choices[0].message.content.trim();
 
-            // OPTIMIZED: Apply same response processing to ALL devices (not just mobile)
-            // Ensure response isn't too long for ANY device
-            if (aiResponse.length > 400) {
-                const sentences = aiResponse.split(/[.!?]+/);
-                aiResponse = sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '.' : '');
+            // ENHANCED: Response processing for all devices
+            // Remove excessive 🙏 emojis (keep only if at start of response)
+            if (aiResponse.includes('🙏')) {
+                const lines = aiResponse.split('\n');
+                aiResponse = lines.map((line, index) => {
+                    if (index === 0) return line; // Keep first line as is
+                    return line.replace(/🙏\s*/g, ''); // Remove from other lines
+                }).join('\n');
             }
 
-            // Add line breaks for better readability on ALL devices
+            // Ensure concise responses for all devices
+            if (aiResponse.length > 350) {
+                const sentences = aiResponse.split(/[.!?]+/);
+                aiResponse = sentences.slice(0, 2).join('. ') + (sentences.length > 2 ? '.' : '');
+            }
+
+            // Add subtle line breaks for readability
             aiResponse = aiResponse.replace(/\. ([A-Z])/g, '.\n\n$1');
 
-            // Log successful response
-            console.log(`Successful response - Mobile: ${isMobileRequest}, Length: ${aiResponse.length}`);
+            // Clean up any double emojis or excessive formatting
+            aiResponse = aiResponse.replace(/🙏\s*🙏/g, '🙏').trim();
 
-            // Return the response with metadata
+            console.log(`Optimized response - Mobile: ${isMobileRequest}, Length: ${aiResponse.length}`);
+
+            // Return the response
             res.status(200).json({
                 response: aiResponse,
                 success: true,
@@ -176,27 +207,27 @@ If asked about non-spiritual topics, redirect: "I'm here for spiritual guidance 
             if (fetchError.name === 'AbortError') {
                 console.error('Request timeout:', timeoutMs);
                 return res.status(408).json({ 
-                    error: isMobileRequest ? 'Request timeout. Please try again.' : 'Request timed out. Please try again.',
+                    error: 'Request timeout. Please try again.',
                     mobile: isMobileRequest,
                     timeout: true
                 });
             }
             
-            throw fetchError; // Re-throw other errors
+            throw fetchError;
         }
 
     } catch (error) {
         console.error('API endpoint error:', error);
         
-        // Enhanced error handling with mobile considerations
-        let errorMessage = 'Internal server error';
+        // Enhanced error handling
+        let errorMessage = 'Service temporarily unavailable';
         let statusCode = 500;
         
         if (error.name === 'AbortError') {
-            errorMessage = req.body?.mobile ? 'Request timeout' : 'Request timed out. Please try again.';
+            errorMessage = 'Request timed out. Please try again.';
             statusCode = 408;
         } else if (error.code === 'ECONNRESET' || error.code === 'ENOTFOUND') {
-            errorMessage = req.body?.mobile ? 'Network error' : 'Network connection error. Please check your connection.';
+            errorMessage = 'Network connection error. Please check your connection.';
             statusCode = 503;
         } else if (error.message?.includes('API key')) {
             errorMessage = 'Authentication error';
@@ -212,12 +243,12 @@ If asked about non-spiritual topics, redirect: "I'm here for spiritual guidance 
     }
 }
 
-// Helper function to detect mobile from user agent (exported for potential reuse)
+// Helper function to detect mobile from user agent
 export function isMobileUserAgent(userAgent) {
     return /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(userAgent || '');
 }
 
-// Helper function to estimate connection speed (basic)
+// Helper function to estimate connection speed
 export function isSlowConnection(req) {
     const connection = req.headers['connection'] || '';
     const via = req.headers['via'] || '';
