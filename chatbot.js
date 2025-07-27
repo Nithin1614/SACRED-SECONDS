@@ -249,7 +249,7 @@ class SpiritualChatbot {
 
         // Check if message is spiritual-related
         if (!this.isSpiritualTopic(message)) {
-            this.addMessage('bot', "🙏 I'm here to guide you on spiritual matters related to Krishna, the Bhagavad Gita, and divine wisdom. How can I help you on your spiritual journey?");
+            this.addMessage('bot', "I'm here to guide you on spiritual matters related to Krishna, the Bhagavad Gita, and divine wisdom. How can I help you on your spiritual journey?");
             this.clearInput();
             return;
         }
@@ -272,8 +272,8 @@ class SpiritualChatbot {
             
             // Mobile-friendly error message
             const errorMsg = this.isMobile ? 
-                "🙏 Connection issue. Please try again." :
-                "🙏 I apologize, but I'm having trouble connecting to divine wisdom right now. Please try again in a moment, or reflect on a Krishna teaching from the main app.";
+                "Connection issue. Please try again." :
+                "I apologize, but I'm having trouble connecting to divine wisdom right now. Please try again in a moment, or reflect on a Krishna teaching from the main app.";
                 
             this.addMessage('bot', errorMsg);
         }
@@ -431,7 +431,7 @@ class SpiritualChatbot {
         
         const typingDiv = document.createElement('div');
         typingDiv.classList.add('bot-message', 'typing-indicator');
-        typingDiv.innerHTML = '<p>🙏 Seeking divine wisdom...</p>';
+        typingDiv.innerHTML = '<p>Seeking divine wisdom...</p>';
         typingDiv.id = 'typing-indicator';
         
         // Mobile-optimized appearance
@@ -464,39 +464,24 @@ class SpiritualChatbot {
         }
     }
 
-    // Enhanced welcome message with mobile optimization
+    // FIXED: Single concise welcome message only
     showWelcomeMessage() {
-        // Only show if there's just the initial message
-        if (this.chatMessages.children.length <= 1) {
-            const welcomeMessages = this.isMobile ? [
-                "✨ Welcome! Ask me about Krishna's wisdom and spiritual guidance.",
-                "🙏 Namaste! I'm here for spiritual questions and Bhagavad Gita teachings.",
-                "🕉️ Greetings! Explore Krishna consciousness and divine wisdom with me."
-            ] : [
-                "✨ Welcome, divine soul! I'm here to share Krishna's wisdom and guide you on your spiritual path.",
-                "🙏 Namaste! Ask me about the Bhagavad Gita, Lord Krishna's teachings, or any spiritual guidance you seek.",
-                "🕉️ Greetings! I'm here to help you explore the depths of Krishna consciousness and spiritual wisdom."
-            ];
-            
-            const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+        // Only show if chat is empty
+        if (this.chatMessages.children.length === 0) {
+            const welcomeMessage = "Welcome! Ask me about spiritual guidance and Krishna's wisdom.";
             
             setTimeout(() => {
-                this.addMessage('bot', randomWelcome);
-            }, this.isMobile ? 300 : 500);
+                this.addMessage('bot', welcomeMessage);
+            }, 300);
         }
     }
 
-    // Clear conversation with mobile optimization
+    // FIXED: Clear conversation with single concise message
     clearHistory() {
         this.conversationHistory = [];
-        
-        const initialMessage = this.isMobile ?
-            "🙏 I'm here for spiritual guidance. How can I help?" :
-            "🙏 Namaste! I'm here to help with spiritual questions, Bhagavad Gita teachings, and Lord Krishna's wisdom. How may I guide you today?";
-            
         this.chatMessages.innerHTML = `
             <div class="bot-message">
-                <p>${initialMessage}</p>
+                <p>Welcome! Ask me about spiritual guidance and Krishna's wisdom.</p>
             </div>
         `;
     }
@@ -570,7 +555,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 observer.observe(chatModal, { attributes: true });
             }
             
-            console.log('🙏 Spiritual chatbot ready for divine guidance');
+            console.log('Spiritual chatbot ready for divine guidance');
             
         } catch (error) {
             console.error('Failed to initialize spiritual chatbot:', error);
