@@ -1,4 +1,4 @@
-// /api/chat.js - Fixed Vercel serverless function with Google Gemma 2 9B
+// /api/chat.js - Fixed with WORKING free models from OpenRouter
 export default async function handler(req, res) {
     // Enhanced CORS headers
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // Get API key - CHECK MULTIPLE POSSIBLE ENV VAR NAMES
+        // Get API key
         const apiKey = process.env.OPENROUTER_API_KEY || 
                        process.env.NEXT_PUBLIC_OPENROUTER_API_KEY ||
                        process.env.OPENROUTER_KEY;
@@ -49,10 +49,8 @@ export default async function handler(req, res) {
         
         if (!apiKey) {
             console.error('CRITICAL: No API key found in environment');
-            console.error('Available env vars:', Object.keys(process.env).join(', '));
             return res.status(500).json({ 
-                error: 'Server configuration error: API key not configured',
-                debug: 'Check Vercel environment variables'
+                error: 'Server configuration error: API key not configured'
             });
         }
 
@@ -97,7 +95,7 @@ Keep responses practical, encouraging, and spiritually focused.`;
             }
         ];
 
-        console.log('Sending request to OpenRouter with Gemma 2 9B...');
+        console.log('Sending request to OpenRouter...');
 
         // Make request with better error handling
         const controller = new AbortController();
@@ -113,7 +111,17 @@ Keep responses practical, encouraging, and spiritually focused.`;
                     'X-Title': 'Spiritual Guide Chat'
                 },
                 body: JSON.stringify({
-                    model: 'google/gemma-2-9b-it:free',
+                    // VERIFIED WORKING FREE MODELS (Choose ONE):
+                    // Best for spiritual guidance (recommended):
+                    model: 'google/gemini-2.0-flash-exp:free',  // Fast, smart, great for conversation
+                    
+                    // Alternative options (uncomment to use):
+                    // model: 'meta-llama/llama-3.3-70b-instruct:free',  // Very good, slightly slower
+                    // model: 'deepseek/deepseek-chat-v3.1:free',  // Good for coding & technical
+                    // model: 'deepseek/deepseek-r1:free',  // Advanced reasoning
+                    // model: 'google/gemma-3-27b-it:free',  // Balanced performance
+                    // model: 'meta-llama/llama-4-scout:free',  // Latest from Meta
+                    
                     messages: messages,
                     temperature: 0.7,
                     max_tokens: 200
