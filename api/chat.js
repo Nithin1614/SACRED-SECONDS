@@ -113,10 +113,10 @@ Keep responses practical, encouraging, and spiritually focused.`;
                 body: JSON.stringify({
                     // VERIFIED WORKING FREE MODELS (Choose ONE):
                     // Best for spiritual guidance (recommended):
-                    model: 'google/gemini-2.0-flash-exp:free',  // Fast, smart, great for conversation
+                   // model: 'google/gemini-2.0-flash-exp:free',  // Fast, smart, great for conversation
                     
                     // Alternative options (uncomment to use):
-                    // model: 'meta-llama/llama-3.3-70b-instruct:free',  // Very good, slightly slower
+                     model: 'meta-llama/llama-3.3-70b-instruct:free',  // Very good, slightly slower
                     // model: 'deepseek/deepseek-chat-v3.1:free',  // Good for coding & technical
                     // model: 'deepseek/deepseek-r1:free',  // Advanced reasoning
                     // model: 'google/gemma-3-27b-it:free',  // Balanced performance
