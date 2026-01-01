@@ -1,15 +1,13 @@
-// /api/chat.js - Universally Optimized Vercel serverless function
+// /api/chat.js - Fixed Vercel serverless function with Google Gemma 2 9B
 export default async function handler(req, res) {
-    // Enhanced CORS headers with mobile considerations
+    // Enhanced CORS headers
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, User-Agent, X-Requested-With, Accept');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
 
-    // Handle preflight requests efficiently
+    // Handle preflight requests
     if (req.method === 'OPTIONS') {
         res.status(200).end();
         return;
@@ -18,57 +16,47 @@ export default async function handler(req, res) {
     // Only allow POST requests
     if (req.method !== 'POST') {
         return res.status(405).json({ 
-            error: 'Method not allowed',
-            allowedMethods: ['POST']
+            error: 'Method not allowed'
         });
     }
 
     try {
-        const { message, conversationHistory, mobile, userAgent } = req.body;
+        const { message, conversationHistory = [] } = req.body;
         
-        // Mobile detection from request
-        const requestUserAgent = userAgent || req.headers['user-agent'] || '';
-        const isMobileRequest = mobile || /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(requestUserAgent);
-        const isSlowConnection = /2G|3G|slow/i.test(req.headers['connection'] || '');
-
-        console.log(`Chat request - Mobile: ${isMobileRequest}, Slow connection: ${isSlowConnection}`);
-
-        // Enhanced input validation
+        console.log('=== DEBUG INFO ===');
+        console.log('Message received:', message);
+        console.log('Env vars available:', Object.keys(process.env).filter(k => k.includes('OPENROUTER')));
+        
+        // Validate message
         if (!message || typeof message !== 'string') {
             return res.status(400).json({ 
-                error: 'Message is required',
-                mobile: isMobileRequest
+                error: 'Message is required'
             });
         }
 
         if (message.length > 500) {
             return res.status(400).json({ 
-                error: 'Message too long. Please keep it under 500 characters.',
-                mobile: isMobileRequest
+                error: 'Message too long. Please keep it under 500 characters.'
             });
         }
 
-        // Rate limiting check
-        const messageWords = message.trim().split(/\s+/).length;
-        if (messageWords < 2) {
-            return res.status(400).json({ 
-                error: 'Please provide a more detailed question.',
-                mobile: isMobileRequest
-            });
-        }
-
-        // Get API key from environment variables
-        const apiKey = process.env.OPENROUTER_API_KEY;
+        // Get API key - CHECK MULTIPLE POSSIBLE ENV VAR NAMES
+        const apiKey = process.env.OPENROUTER_API_KEY || 
+                       process.env.NEXT_PUBLIC_OPENROUTER_API_KEY ||
+                       process.env.OPENROUTER_KEY;
+        
+        console.log('API Key found:', apiKey ? `Yes (${apiKey.substring(0, 10)}...)` : 'No');
+        
         if (!apiKey) {
-            console.error('OPENROUTER_API_KEY not found in environment variables');
+            console.error('CRITICAL: No API key found in environment');
+            console.error('Available env vars:', Object.keys(process.env).join(', '));
             return res.status(500).json({ 
-                error: 'Server configuration error',
-                mobile: isMobileRequest
+                error: 'Server configuration error: API key not configured',
+                debug: 'Check Vercel environment variables'
             });
         }
 
-        // ENHANCED: Expanded topics with respectful decline system
-        const enhancedSystemPrompt = `You are a wise spiritual guide. Keep responses concise (1-3 sentences). Avoid using 🙏 emoji in responses. Be warm but direct.
+        const systemPrompt = `You are a wise spiritual guide. Keep responses concise (1-3 sentences). Avoid using 🙏 emoji in responses. Be warm but direct.
 
 SPIRITUAL TOPICS YOU CAN DISCUSS:
 - Krishna teachings and Bhagavad Gita wisdom
@@ -91,113 +79,103 @@ TOPICS TO POLITELY DECLINE:
 - Entertainment, movies, games, sports
 - Medical advice or health diagnoses
 - Financial, legal, or business advice
-- Relationship counseling (beyond spiritual perspective)
-- Academic subjects unrelated to spirituality
 
-If asked about declined topics, respond politely: "I focus specifically on spiritual guidance and self-development. I'd be happy to help you explore [topic] from a spiritual perspective instead. What spiritual question can I assist you with today?"
+If asked about declined topics, respond politely: "I focus specifically on spiritual guidance and self-development. What spiritual question can I assist you with today?"
 
-Keep responses practical, encouraging, and spiritually focused. No lengthy explanations.`;
+Keep responses practical, encouraging, and spiritually focused.`;
 
-        // Universal optimization: same approach for all devices
-        const systemPrompt = enhancedSystemPrompt;
-        const maxTokens = isSlowConnection ? 150 : 200; // Consistent concise responses
-        const temperature = 0.65; // Balanced for all devices
-
-        // Prepare messages for API
+        // Prepare messages
         const messages = [
             {
                 role: 'system',
                 content: systemPrompt
             },
-            ...(conversationHistory || []).slice(-8) // Slightly reduced for better performance
+            ...conversationHistory.slice(-8),
+            {
+                role: 'user',
+                content: message
+            }
         ];
 
-        // Enhanced timeout handling
-        const timeoutMs = isMobileRequest ? 15000 : 25000; // Slightly reduced desktop timeout
+        console.log('Sending request to OpenRouter with Gemma 2 9B...');
+
+        // Make request with better error handling
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
 
         try {
-            // Make request to OpenRouter API
             const apiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json',
-                    'HTTP-Referer': process.env.VERCEL_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://meditation-app.vercel.app',
-                    'X-Title': '60 Second Meditation - Enhanced Spiritual Guide'
+                    'HTTP-Referer': process.env.VERCEL_URL || 'https://your-app.vercel.app',
+                    'X-Title': 'Spiritual Guide Chat'
                 },
                 body: JSON.stringify({
-                    model: 'mistralai/mistral-small-3.2-24b-instruct:free',
+                    model: 'google/gemma-2-9b-it:free',
                     messages: messages,
-                    temperature: temperature,
-                    max_tokens: maxTokens,
-                    top_p: 0.85, // Optimized for all devices
-                    frequency_penalty: 0.1,
-                    presence_penalty: 0.1
+                    temperature: 0.7,
+                    max_tokens: 200
                 }),
                 signal: controller.signal
             });
 
             clearTimeout(timeoutId);
 
+            console.log('OpenRouter response status:', apiResponse.status);
+
+            // Check response status
             if (!apiResponse.ok) {
                 const errorText = await apiResponse.text();
-                console.error('OpenRouter API error:', apiResponse.status, errorText);
+                console.error('OpenRouter API error:', {
+                    status: apiResponse.status,
+                    statusText: apiResponse.statusText,
+                    body: errorText
+                });
                 
-                const errorMessage = isMobileRequest ? 
-                    'Connection issue. Please try again.' :
-                    'Unable to connect to spiritual guidance. Please try again.';
-                    
-                return res.status(500).json({ 
-                    error: errorMessage,
-                    mobile: isMobileRequest,
-                    statusCode: apiResponse.status
+                return res.status(apiResponse.status).json({ 
+                    error: `API Error: ${apiResponse.statusText}`,
+                    details: errorText,
+                    status: apiResponse.status
                 });
             }
 
             const data = await apiResponse.json();
+            console.log('API response received successfully');
             
-            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                console.error('Unexpected API response format:', data);
+            if (!data.choices?.[0]?.message?.content) {
+                console.error('Invalid response structure:', JSON.stringify(data));
                 return res.status(500).json({ 
-                    error: 'Invalid response format',
-                    mobile: isMobileRequest
+                    error: 'Invalid API response format',
+                    debug: data
                 });
             }
 
             let aiResponse = data.choices[0].message.content.trim();
 
-            // ENHANCED: Response processing for all devices
-            // Remove excessive 🙏 emojis (keep only if at start of response)
+            // Clean up response
             if (aiResponse.includes('🙏')) {
                 const lines = aiResponse.split('\n');
                 aiResponse = lines.map((line, index) => {
-                    if (index === 0) return line; // Keep first line as is
-                    return line.replace(/🙏\s*/g, ''); // Remove from other lines
+                    if (index === 0) return line;
+                    return line.replace(/🙏\s*/g, '');
                 }).join('\n');
             }
 
-            // Ensure concise responses for all devices
+            // Ensure conciseness
             if (aiResponse.length > 350) {
-                const sentences = aiResponse.split(/[.!?]+/);
-                aiResponse = sentences.slice(0, 2).join('. ') + (sentences.length > 2 ? '.' : '');
+                const sentences = aiResponse.split(/[.!?]+/).filter(s => s.trim());
+                aiResponse = sentences.slice(0, 2).join('. ') + '.';
             }
 
-            // Add subtle line breaks for readability
-            aiResponse = aiResponse.replace(/\. ([A-Z])/g, '.\n\n$1');
-
-            // Clean up any double emojis or excessive formatting
             aiResponse = aiResponse.replace(/🙏\s*🙏/g, '🙏').trim();
 
-            console.log(`Optimized response - Mobile: ${isMobileRequest}, Length: ${aiResponse.length}`);
+            console.log('Response sent successfully, length:', aiResponse.length);
 
-            // Return the response
-            res.status(200).json({
+            return res.status(200).json({
                 response: aiResponse,
                 success: true,
-                mobile: isMobileRequest,
-                responseLength: aiResponse.length,
                 tokensUsed: data.usage?.total_tokens || 0
             });
 
@@ -205,56 +183,42 @@ Keep responses practical, encouraging, and spiritually focused. No lengthy expla
             clearTimeout(timeoutId);
             
             if (fetchError.name === 'AbortError') {
-                console.error('Request timeout:', timeoutMs);
+                console.error('Request timeout after 30s');
                 return res.status(408).json({ 
                     error: 'Request timeout. Please try again.',
-                    mobile: isMobileRequest,
                     timeout: true
                 });
             }
             
+            console.error('Fetch error:', fetchError);
             throw fetchError;
         }
 
     } catch (error) {
-        console.error('API endpoint error:', error);
+        console.error('=== CRITICAL ERROR ===');
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
         
-        // Enhanced error handling
         let errorMessage = 'Service temporarily unavailable';
         let statusCode = 500;
         
         if (error.name === 'AbortError') {
-            errorMessage = 'Request timed out. Please try again.';
+            errorMessage = 'Request timed out';
             statusCode = 408;
         } else if (error.code === 'ECONNRESET' || error.code === 'ENOTFOUND') {
-            errorMessage = 'Network connection error. Please check your connection.';
+            errorMessage = 'Network connection error';
             statusCode = 503;
-        } else if (error.message?.includes('API key')) {
-            errorMessage = 'Authentication error';
-            statusCode = 401;
         }
 
-        res.status(statusCode).json({ 
+        return res.status(statusCode).json({ 
             error: errorMessage,
-            mobile: req.body?.mobile || false,
-            code: error.code || 'UNKNOWN_ERROR',
+            debug: {
+                name: error.name,
+                message: error.message,
+                code: error.code
+            },
             timestamp: new Date().toISOString()
         });
     }
-}
-
-// Helper function to detect mobile from user agent
-export function isMobileUserAgent(userAgent) {
-    return /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(userAgent || '');
-}
-
-// Helper function to estimate connection speed
-export function isSlowConnection(req) {
-    const connection = req.headers['connection'] || '';
-    const via = req.headers['via'] || '';
-    const saveData = req.headers['save-data'] === 'on';
-    
-    return /2G|3G|slow/i.test(connection) || 
-           /proxy|compress/i.test(via) || 
-           saveData;
 }
